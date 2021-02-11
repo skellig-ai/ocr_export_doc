@@ -133,13 +133,10 @@ headings = ['1. Exporter \n(Name, full address, country)',
 print("[INFO] loading images...")
 image = cv2.imread(args["image"])
 template = cv2.imread(args["template"])
-image_y, image_x, _ = image.shape
-template_y, template_x, _ = image.shape
 
 # align the images
 print("[INFO] aligning images...")
 aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, debug=False)
-aligned = cv2.resize(aligned, (2*template_x, 2*template_y))
 
 # initialize a results list to store the document OCR parsing results
 print("[INFO] OCR'ing document...")
@@ -149,7 +146,6 @@ parsingResults = []
 for loc in OCR_LOCATIONS:
     # extract the OCR ROI from the aligned image
     (x, y, w, h) = loc.bbox
-    (x, y, w, h) = (2*x, 2*y, 2*w, 2*h)
     roi = aligned[y:y + h, x:x + w]
 
     # OCR the ROI using Tesseract
@@ -223,7 +219,6 @@ for (idx, result) in enumerate(results.values()):
     # then strip out non-ASCII text so we can draw the text on the
     # output image using OpenCV
     (x, y, w, h) = loc["bbox"]
-    (x, y, w, h) = (2*x, 2*y, 2*w, 2*h)
     clean = cleanup_text(text)
 
     # draw a bounding box around the text
