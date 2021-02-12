@@ -1,0 +1,54 @@
+import numpy as np
+
+
+def cleanup_text(text):
+	# strip out non-ASCII text so we can draw the text on the image
+	# using OpenCV
+	return "".join([c if ord(c) < 128 else "" for c in text]).strip()
+
+def acc(ground_value, ocr_value):
+    bigger = max(len(ground_value), len(ocr_value))
+    lev = damerau_levenshtein_distance(ground_value, ocr_value)
+    return (bigger - lev)/bigger
+
+def ocr_acc(field_truth, field_ocr):
+    k = 0
+    max_line_acc = np.zeros( (len(field_truth),) )
+    for i, fline in enumerate(field_truth):
+        line_acc = np.zeros( (len(field_ocr[k:]),) )
+        for j, oline in enumerate(field_ocr[k:]):
+            line_acc[j] = acc(fline, oline)
+        
+        if len(line_acc) == 0:
+            max_line_acc[i] = 0
+        elif max(line_acc) > 0.5:
+            max_line_acc[i] = max(line_acc)
+            k += np.argmax(line_acc) + 1
+        
+    return max_line_acc.mean()
+
+def damerau_levenshtein_distance(s1, s2):
+    d = {}
+    lenstr1 = len(s1)
+    lenstr2 = len(s2)
+    for i in range(-1,lenstr1+1):
+        d[(i,-1)] = i+1
+    for j in range(-1,lenstr2+1):
+        d[(-1,j)] = j+1
+
+    for i in range(lenstr1):
+        for j in range(lenstr2):
+            if s1[i] == s2[j]:
+                cost = 0
+            else:
+                cost = 1
+            d[(i,j)] = min(
+                           d[(i-1,j)] + 1, # deletion
+                           d[(i,j-1)] + 1, # insertion
+                           d[(i-1,j-1)] + cost, # substitution
+                          )
+            if i and j and s1[i]==s2[j-1] and s1[i-1] == s2[j]:
+                d[(i,j)] = min (d[(i,j)], d[i-2,j-2] + cost) # transposition
+
+    return d[lenstr1-1,lenstr2-1]
+

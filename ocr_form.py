@@ -4,62 +4,14 @@
 # import the necessary packages
 from pyimagesearch.alignment import align_images
 from collections import namedtuple
+from utility import *
+from config import *
 import pytesseract
 import argparse
 import imutils
 import cv2
 import numpy as np
 
-def cleanup_text(text):
-	# strip out non-ASCII text so we can draw the text on the image
-	# using OpenCV
-	return "".join([c if ord(c) < 128 else "" for c in text]).strip()
-
-def acc(ground_value, ocr_value):
-    bigger = max(len(ground_value), len(ocr_value))
-    lev = damerau_levenshtein_distance(ground_value, ocr_value)
-    return (bigger - lev)/bigger
-
-def ocr_acc(field_truth, field_ocr):
-    k = 0
-    max_line_acc = np.zeros( (len(field_truth),) )
-    for i, fline in enumerate(field_truth):
-        line_acc = np.zeros( (len(field_ocr[k:]),) )
-        for j, oline in enumerate(field_ocr[k:]):
-            line_acc[j] = acc(fline, oline)
-        
-        if len(line_acc) == 0:
-            max_line_acc[i] = 0
-        elif max(line_acc) > 0.5:
-            max_line_acc[i] = max(line_acc)
-            k += np.argmax(line_acc) + 1
-        
-    return max_line_acc.mean()
-
-def damerau_levenshtein_distance(s1, s2):
-    d = {}
-    lenstr1 = len(s1)
-    lenstr2 = len(s2)
-    for i in range(-1,lenstr1+1):
-        d[(i,-1)] = i+1
-    for j in range(-1,lenstr2+1):
-        d[(-1,j)] = j+1
-
-    for i in range(lenstr1):
-        for j in range(lenstr2):
-            if s1[i] == s2[j]:
-                cost = 0
-            else:
-                cost = 1
-            d[(i,j)] = min(
-                           d[(i-1,j)] + 1, # deletion
-                           d[(i,j-1)] + 1, # insertion
-                           d[(i-1,j-1)] + cost, # substitution
-                          )
-            if i and j and s1[i]==s2[j-1] and s1[i-1] == s2[j]:
-                d[(i,j)] = min (d[(i,j)], d[i-2,j-2] + cost) # transposition
-
-    return d[lenstr1-1,lenstr2-1]
 
 ##def opening(image):
 ##    kernel = np.ones((5,5),np.uint8)
@@ -76,57 +28,6 @@ ap.add_argument("-v", "--threshold", required=True,
 args = vars(ap.parse_args())
 threshold = float(args['threshold'])
 
-# create a named tuple which we can use to create locations of the
-# input document which we wish to OCR
-OCRLocation = namedtuple("OCRLocation", ["id", "bbox",
-    "filter_keywords"])
-
-# define the locations of each area of the document we wish to OCR
-
-OCR_LOCATIONS = [
-    OCRLocation("Exporter", (252, 147, 1468, 399),
-        ['Exporter', '(Name,', 'full', 'address', 'country)']),
-    OCRLocation("preferential_trade_between", (1720, 416, 1435, 511),
-        ['Certificate', 'used', 'in', 'preferential', 'trade', 'between', "and", "(Insert", 		'appropriate', 'countries', 'or', 'groups', 'of', 'territories)']),
-    OCRLocation("Consignee", (252, 546, 1468, 665),
-        ["Consignee", "(Name", "full address", "country)", ",", "(Optional)", "3"]),
-    OCRLocation("transport_details", (252, 1211, 1468, 533),
-        ["Transport", "details", "(Optional)", "6"]),
-    OCRLocation("item_number", (252, 1744, 772, 1999),
-        ["8", "Item", "number:", "marks", "and", "numbers"]),
-    OCRLocation("description_of_goods", (1024, 1744, 1442, 1999),
-        ["Number", "and", "kind", "of", "packages", "(1):", "description", "goods"]),
-    OCRLocation("gross_weight", (2466, 1744, 349, 1999), 
-        ["Gross", "weight", "(kg)", "or", "other", "measure", "(litres,", "cu.", "m.,", "etc)"]),
-    OCRLocation("customs_office", (252, 3743, 1797, 802),
-        ["Customs", "11.", "office", 'Declaration', 'certified', 'Export', 'document', '(2):', 'From', 'No.', 'Endorsement', 'stamp', 'Issuing', 'country', 'or', 'territory', 'UNITED', 'KINGDOM', "date", "(Signature)"]),
-    OCRLocation("exporter_date_signature", (2049, 3743, 1106, 802),
-        ['12.', 'Declaration', 'by', 'Exporter', 'I,', 'the', 'undersigned,', 'declare', 'that', 'the', 'goods', 'described', 'above', 'meet', 'conditions', 'required', 'for', 'issue', 'of', 'this', 'certificate.',"(Place", "and", "date", "(signature)", "."]),
-    
-]
-
-ground_truth = {"Exporter":["Luke Skywalker", "Remote Island", "Ahch-To", "Outer Reaches"],
-                "preferential_trade_between":["Ahch-To", "Jakko"],
-                "Consignee":["Rey Palpatine", "Niima Outpost", "Jakko", "Western Reaches"],
-                "transport_details":["Millennium Falcon"],
-                "item_number":["#03418GH 093"],
-                "description_of_goods":["Ancient Jedi texts"],
-                "gross_weight":["15 kg"],
-                "customs_office":["Ahch-To", "30327", "Niima Outpost Militia"],
-                "customs_date_signature":["20/01/21", "Constable Zuvio"],
-                "exporter_date_signature":["Jedi Temple, 01/12/20", "Luck Skywalker"]}
-
-headings = ['1. Exporter \n(Name, full address, country)',
-            '2. Certificate used in \npreferential trade between',
-            '3. Consignee \n(Name, full address, country)(Optional)',
-            '6. Transport details (Optional)',
-            '8.1. Item number: \nmarks and numbers',
-            '8.2. Number and kind of packages (1): \ndescription of goods',
-            '9. Gross \nweight (kg) \nof other \nmeasure \n(liters, cu. m., etc)',
-            '11.1. Customs Endorsement',
-            '11.2. Customs Signature',
-            '12. Declaration by the Exporter']
-
 # load the input image and template from disk
 print("[INFO] loading images...")
 image = cv2.imread(args["image"])
@@ -135,6 +36,8 @@ template = cv2.imread(args["template"])
 # align the images
 print("[INFO] aligning images...")
 aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, debug=False)
+y, x, _ = aligned.shape
+aligned = cv2.resize(aligned, (2*x, 2*y))
 
 # initialize a results list to store the document OCR parsing results
 print("[INFO] OCR'ing document...")
@@ -224,8 +127,8 @@ for (idx, result) in enumerate(results.values()):
     cv2.rectangle(aligned, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
     startY = y + 65
-    cv2.putText(ocred, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 1)
-    cv2.putText(aligned, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 1)
+    cv2.putText(ocred, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+    cv2.putText(aligned, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
     # calculate accuracy
     field_acc[idx] = ocr_acc(ground_field, text.split("\n"))
@@ -236,9 +139,9 @@ for (idx, result) in enumerate(results.values()):
         # draw the line on the output image
         startY = y + ((i+2) * 25) + 40
         cv2.putText(ocred, line, (x, startY),
-            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 1)
+            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
         cv2.putText(aligned, line, (x, startY),
-            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 1)
+            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
 
 print(f'Accuracy: {field_acc.mean()}')
 cv2.putText(ocred, f'Accuracy: {np.round(100*field_acc.mean())}%', (800, 100),
