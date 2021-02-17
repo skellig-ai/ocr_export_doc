@@ -104,7 +104,10 @@ for (loc, line) in parsingResults:
 
 ocred = np.ones(aligned.shape)
 
+#initalising accuracy arrays
+doc_acc = []
 field_acc = np.zeros( (len(results.values()),1) )
+
 # loop over the results
 for (idx, result) in enumerate(results.values()):
     # unpack the result tuple
@@ -131,11 +134,11 @@ for (idx, result) in enumerate(results.values()):
     cv2.putText(aligned, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
     # calculate accuracy
-    field_acc[idx] = ocr_acc(ground_field, text.split("\n"))
+    field_acc[idx], doc_acc = ocr_acc(ground_field, text.split("\n"), doc_acc)
     print(field_acc[idx])
     
     # loop over all lines in the text
-    for (i, line) in enumerate(text.split("\n")):
+    for (i, line) in enumerate(text.split("\n")[:-1]):
         # draw the line on the output image
         startY = y + ((i+2) * 25) + 40
         cv2.putText(ocred, line, (x, startY),
@@ -144,7 +147,7 @@ for (idx, result) in enumerate(results.values()):
             cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
 
 print(f'Accuracy: {field_acc.mean()}')
-cv2.putText(ocred, f'Accuracy: {np.round(100*field_acc.mean())}%', (800, 100),
+cv2.putText(ocred, f'Document Accuracy: {np.round(100*np.asarray(doc_acc).mean())}%', (800, 100),
             cv2.FONT_HERSHEY_PLAIN, 5, (255, 0, 255), 3)
 
 # show the input and output images, resizing it such that they fit
