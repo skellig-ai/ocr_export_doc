@@ -11,23 +11,27 @@ def acc(ground_value, ocr_value):
     lev = damerau_levenshtein_distance(ground_value, ocr_value)
     return (bigger - lev)/bigger
 
-def ocr_acc(field_truth, field_ocr, doc_acc):
+def ocr_acc(field_truth, field_ocr, all_acc):
     k = 0
+    ocr_text = []
     max_line_acc = np.zeros( (len(field_truth),) )
     for i, fline in enumerate(field_truth):
         line_acc = np.zeros( (len(field_ocr[k:]),) )
+        
         for j, oline in enumerate(field_ocr[k:]):
             line_acc[j] = acc(fline, oline)
-        
-        if len(line_acc) == 0:
-            max_line_acc[i] = 0
-            doc_acc.append(0)
-        elif max(line_acc) > 0.5:
-            max_line_acc[i] = max(line_acc)
-            doc_acc.append(max_line_acc[i])
+            
+        if max(line_acc) < 0.5:
+            all_acc.append(0)
+        else:
+            max_idx = np.argmax(line_acc)
+            max_line_acc[i] = line_acc[max_idx]
+            all_acc.append(line_acc[max_idx])
+            ocr_text.append(field_ocr[k+max_idx])
             k += np.argmax(line_acc) + 1
-        
-    return max_line_acc.mean(), doc_acc
+    
+    print(np.asarray(all_acc).mean())
+    return max_line_acc.mean(), all_acc, ocr_text
 
 def damerau_levenshtein_distance(s1, s2):
     d = {}

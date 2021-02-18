@@ -134,11 +134,11 @@ for (idx, result) in enumerate(results.values()):
     cv2.putText(aligned, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
     # calculate accuracy
-    field_acc[idx], doc_acc = ocr_acc(ground_field, text.split("\n"), doc_acc)
+    field_acc[idx], doc_acc, ocr_text = ocr_acc(ground_field, text.split("\n"), doc_acc)
     print(field_acc[idx])
     
     # loop over all lines in the text
-    for (i, line) in enumerate(text.split("\n")[:-1]):
+    for (i, line) in enumerate(ocr_text):
         # draw the line on the output image
         startY = y + ((i+2) * 25) + 40
         cv2.putText(ocred, line, (x, startY),
