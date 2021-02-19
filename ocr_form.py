@@ -102,7 +102,7 @@ for (loc, line) in parsingResults:
         # update our results dictionary
         results[loc["id"]] = (text, loc)
 
-ocred = np.ones(aligned.shape)
+ocred = 255*np.ones(aligned.shape)
 
 #initalising accuracy arrays
 doc_acc = []
@@ -130,8 +130,10 @@ for (idx, result) in enumerate(results.values()):
     cv2.rectangle(aligned, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
     startY = y + 65
-    cv2.putText(ocred, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-    cv2.putText(aligned, headings[idx], (x, startY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+    for j, line in enumerate(headings[idx].split('\n')):
+    	startY = y + ((j+2) * 50) + 10
+    	cv2.putText(ocred, line, (x, startY), cv2.FONT_HERSHEY_PLAIN, 4, (255, 0, 0), 3)
+    	cv2.putText(aligned, line, (x, startY), cv2.FONT_HERSHEY_PLAIN, 4, (255, 0, 0), 3)
     
     # calculate accuracy
     field_acc[idx], doc_acc, ocr_text = ocr_acc(ground_field, text.split("\n"), doc_acc)
@@ -140,15 +142,19 @@ for (idx, result) in enumerate(results.values()):
     # loop over all lines in the text
     for (i, line) in enumerate(ocr_text):
         # draw the line on the output image
-        startY = y + ((i+2) * 25) + 40
+        startY = y + ((j+i+3) * 50) + 10
         cv2.putText(ocred, line, (x, startY),
-            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+            cv2.FONT_HERSHEY_PLAIN, 4, (0, 0, 255), 3)
         cv2.putText(aligned, line, (x, startY),
-            cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+            cv2.FONT_HERSHEY_PLAIN, 4, (0, 0, 255), 3)
 
-print(f'Accuracy: {field_acc.mean()}')
-cv2.putText(ocred, f'Document Accuracy: {np.round(100*np.asarray(doc_acc).mean())}%', (800, 100),
+print(f'Field Accuracy: {field_acc.mean()}')
+cv2.putText(ocred, f'Accuracy: {np.round(100*np.asarray(doc_acc).mean())}%', (800, 100),
             cv2.FONT_HERSHEY_PLAIN, 5, (255, 0, 255), 3)
+
+
+cv2.imwrite(f'result_images/aligned_BinTres{threshold}.png',aligned)
+cv2.imwrite(f'result_images/ocred_BinTres{threshold}.png',ocred)
 
 # show the input and output images, resizing it such that they fit
 # on our screen

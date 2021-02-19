@@ -41,13 +41,13 @@ ground_truth = {"Exporter":["Luke Skywalker", "Remote Island", "Ahch-To", "Outer
                 "customs_date_signature":["20/01/21", "Constable Zuvio"],
                 "exporter_date_signature":["Jedi Temple, 01/12/20", "Luck Skywalker"]}
 
-headings = ['1. Exporter \n(Name, full address, country)',
-            '2. Certificate used in \npreferential trade between',
-            '3. Consignee \n(Name, full address, country)(Optional)',
+headings = ['1. Exporter \n (Name, full address, country)',
+            '2. Certificate used in \n preferential trade between',
+            '3. Consignee \n (Name, full address, country)(Optional)',
             '6. Transport details (Optional)',
-            '8.1. Item number: \nmarks and numbers',
-            '8.2. Number and kind of packages (1): \ndescription of goods',
-            '9. Gross \nweight (kg) \nof other \nmeasure \n(liters, cu. m., etc)',
+            '8.1. Item number: \n marks and numbers',
+            '8.2. Number and kind of packages (1): \n description of goods',
+            '9. Gross \n weight (kg) \n of other \n measure \n (liters, cu. m., etc)',
             '11.1. Customs Endorsement',
             '11.2. Customs Signature',
             '12. Declaration by the Exporter']

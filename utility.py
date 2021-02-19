@@ -19,7 +19,13 @@ def ocr_acc(field_truth, field_ocr, all_acc):
         line_acc = np.zeros( (len(field_ocr[k:]),) )
         
         for j, oline in enumerate(field_ocr[k:]):
-            line_acc[j] = acc(fline, oline)
+            line_acc[j] = acc(fline.lower(), oline.lower())
+            
+        print(k)
+        if len(line_acc) == 0:
+            max_line_acc[i:len(field_truth)] = 0
+            all_acc.append(len(field_truth)*[0])
+            return max_line_acc.mean(), all_acc, ocr_text
             
         if max(line_acc) < 0.5:
             all_acc.append(0)
@@ -28,7 +34,7 @@ def ocr_acc(field_truth, field_ocr, all_acc):
             max_line_acc[i] = line_acc[max_idx]
             all_acc.append(line_acc[max_idx])
             ocr_text.append(field_ocr[k+max_idx])
-            k += np.argmax(line_acc) + 1
+            k += max_idx + 1
     
     print(np.asarray(all_acc).mean())
     return max_line_acc.mean(), all_acc, ocr_text
