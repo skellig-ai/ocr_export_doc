@@ -127,13 +127,11 @@ for (idx, result) in enumerate(results.values()):
 
     # draw a bounding box around the text
     cv2.rectangle(ocred, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv2.rectangle(aligned, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
     startY = y + 65
     for j, line in enumerate(headings[idx].split('\n')):
     	startY = y + ((j+2) * 50) + 10
     	cv2.putText(ocred, line, (x, startY), cv2.FONT_HERSHEY_PLAIN, 4, (255, 0, 0), 3)
-    	cv2.putText(aligned, line, (x, startY), cv2.FONT_HERSHEY_PLAIN, 4, (255, 0, 0), 3)
     
     # calculate accuracy
     field_acc[idx], doc_acc, ocr_text = ocr_acc(ground_field, text.split("\n"), doc_acc)
@@ -144,8 +142,6 @@ for (idx, result) in enumerate(results.values()):
         # draw the line on the output image
         startY = y + ((j+i+3) * 50) + 10
         cv2.putText(ocred, line, (x, startY),
-            cv2.FONT_HERSHEY_PLAIN, 4, (0, 0, 255), 3)
-        cv2.putText(aligned, line, (x, startY),
             cv2.FONT_HERSHEY_PLAIN, 4, (0, 0, 255), 3)
 
 print(f'Field Accuracy: {field_acc.mean()}')
