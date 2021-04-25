@@ -31,24 +31,24 @@ args = vars(ap.parse_args())
 # load the input image and template from disk
 print("[INFO] loading images...")
 if args['image'][-3:] == 'pdf':
-	print('PDF Detected')
+	print('PDF Detected, Converting to .jpg...')
 	args['image'] = convert_pdf(args['image'])
-	print(type(args['image']))
-print(type(args['image']))
 image = cv2.imread(str(args["image"]))
 print(type(image))
 template = cv2.imread(args["template"])
 
 # align the images
 print("[INFO] aligning images...")
+scale = 3
 if args['threshold'] == None:
 	y, x, _ = image.shape
-	aligned = cv2.resize(image, (2*x, 2*y))
+	aligned = cv2.resize(image, (scale*2*x, scale*2*y))
 else:
 	threshold = float(args['threshold'])
 	aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, 		debug=False)
 	y, x, _ = aligned.shape
-	aligned = cv2.resize(aligned, (2*x, 2*y))
+	print(f"orignal.shape: {aligned.shape}")
+	aligned = cv2.resize(aligned, (scale*2*x, scale*2*y))
 
 # initialize a results list to store the document OCR parsing results
 print("[INFO] OCR'ing document...")
@@ -57,8 +57,11 @@ parsingResults = []
 # loop over the locations of the document we are going to OCR
 for loc in OCR_LOCATIONS:
     # extract the OCR ROI from the aligned image
-    (x, y, w, h) = loc.bbox
+    (x, y, w, h) = tuple([scale*t for t in loc.bbox])
     roi = aligned[y:y + h, x:x + w]
+#    print(f"aligned.shape: {aligned.shape}")
+#    print(f"BBox: {loc.bbox}")
+#    print(f"X={x}, Y={y}, W={w}, H={h}")
 
     # OCR the ROI using Tesseract
 #    binary = cv2.threshold(roi, threshold, 255, cv2.THRESH_BINARY)[1]
