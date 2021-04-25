@@ -1,5 +1,6 @@
 import numpy as np
-
+from pdf2image import convert_from_path
+from pathlib import Path
 
 def cleanup_text(text):
 	# strip out non-ASCII text so we can draw the text on the image
@@ -63,4 +64,12 @@ def damerau_levenshtein_distance(s1, s2):
                 d[(i,j)] = min (d[(i,j)], d[i-2,j-2] + cost) # transposition
 
     return d[lenstr1-1,lenstr2-1]
+
+def convert_pdf(path):
+	path = Path(path)
+	pages =convert_from_path(path)
+	new_path = Path('test_images')/(path.stem + '.jpg')
+	for page in pages:
+    		page.save(new_path)
+	return new_path
 

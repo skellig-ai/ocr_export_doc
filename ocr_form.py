@@ -1,5 +1,5 @@
 # USAGE
-# python ocr_form.py --image scans/scan_01.jpg --template form_w4.png
+# python3 ocr_form.py --image scans/File_000.jpeg --template EUR-MED_C1300-1.png --threshold 75
 
 # import the necessary packages
 from pyimagesearch.alignment import align_images
@@ -23,21 +23,32 @@ ap.add_argument("-i", "--image", required=True,
 	help="path to input image that we'll align to template")
 ap.add_argument("-t", "--template", required=True,
 	help="path to input template image")
-ap.add_argument("-v", "--threshold", required=True,
+ap.add_argument("-v", "--threshold", default=None,
 	help="path to input template image")
 args = vars(ap.parse_args())
-threshold = float(args['threshold'])
+
 
 # load the input image and template from disk
 print("[INFO] loading images...")
-image = cv2.imread(args["image"])
+if args['image'][-3:] == 'pdf':
+	print('PDF Detected')
+	args['image'] = convert_pdf(args['image'])
+	print(type(args['image']))
+print(type(args['image']))
+image = cv2.imread(str(args["image"]))
+print(type(image))
 template = cv2.imread(args["template"])
 
 # align the images
 print("[INFO] aligning images...")
-aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, debug=False)
-y, x, _ = aligned.shape
-aligned = cv2.resize(aligned, (2*x, 2*y))
+if args['threshold'] == None:
+	y, x, _ = image.shape
+	aligned = cv2.resize(image, (2*x, 2*y))
+else:
+	threshold = float(args['threshold'])
+	aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, 		debug=False)
+	y, x, _ = aligned.shape
+	aligned = cv2.resize(aligned, (2*x, 2*y))
 
 # initialize a results list to store the document OCR parsing results
 print("[INFO] OCR'ing document...")
@@ -50,8 +61,8 @@ for loc in OCR_LOCATIONS:
     roi = aligned[y:y + h, x:x + w]
 
     # OCR the ROI using Tesseract
-    binary = cv2.threshold(roi, threshold, 255, cv2.THRESH_BINARY)[1]
-    img = cv2.resize(binary, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+#    binary = cv2.threshold(roi, threshold, 255, cv2.THRESH_BINARY)[1]
+#    img = cv2.resize(binary, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 ##  binary = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 ##  opening = opening(image)
     rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
@@ -149,8 +160,8 @@ cv2.putText(ocred, f'Accuracy: {np.round(100*np.asarray(doc_acc).mean())}%', (80
             cv2.FONT_HERSHEY_PLAIN, 5, (255, 0, 255), 3)
 
 
-cv2.imwrite(f'result_images/aligned_BinTres{threshold}.png',aligned)
-cv2.imwrite(f'result_images/ocred_BinTres{threshold}.png',ocred)
+#cv2.imwrite(f'result_images/aligned_BinTres{threshold}.png',aligned)
+#cv2.imwrite(f'result_images/ocred_BinTres{threshold}.png',ocred)
 
 # show the input and output images, resizing it such that they fit
 # on our screen
