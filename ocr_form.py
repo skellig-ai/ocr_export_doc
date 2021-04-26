@@ -39,13 +39,14 @@ template = cv2.imread(args["template"])
 
 # align the images
 print("[INFO] aligning images...")
-scale = 3
+scale = 2
 if args['threshold'] == None:
 	y, x, _ = image.shape
 	aligned = cv2.resize(image, (scale*2*x, scale*2*y))
 else:
 	threshold = float(args['threshold'])
-	aligned = align_images(cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)[1], template, 		debug=False)
+	aligned = align_images(cv2.threshold(image, 130, 255, cv2.THRESH_BINARY)[1], template, 		debug=False)
+#	aligned = align_images(image, template, debug=False)
 	y, x, _ = aligned.shape
 	print(f"orignal.shape: {aligned.shape}")
 	aligned = cv2.resize(aligned, (scale*2*x, scale*2*y))
