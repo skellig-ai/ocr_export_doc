@@ -1,5 +1,6 @@
 from google.cloud import documentai_v1 as documentai
 from google.cloud import storage
+from config import *
 
 # TODO(developer): Uncomment these variables before running the sample.
 project_id= 'edd-gcp-01'
@@ -48,10 +49,14 @@ def process_document_sample(
     # Read the text recognition output from the processor
     print("The document contains the following paragraphs:")
     for page in document_pages:
-        paragraphs = page.paragraphs
-        for paragraph in paragraphs:
-            paragraph_text = get_text(paragraph.layout, document)
-            print(f"Paragraph text: {paragraph_text}")
+
+      for field in FIELD_NAMES:
+        paragraph_text = ''
+        for idx in field.paragraph:
+          paragraph_text += get_text(page.paragraphs[idx].layout, document)
+        print(paragraph_text)
+
+    return document_pages, document
 
 def get_text(doc_element: dict, document: dict):
     """
@@ -71,5 +76,5 @@ def get_text(doc_element: dict, document: dict):
         end_index = int(segment.end_index)
         response += document.text[start_index:end_index]
     return response
-res = process_document_sample(project_id, location, processor_id, file_path)
+process_document_sample(project_id, location, processor_id, file_path)
 
