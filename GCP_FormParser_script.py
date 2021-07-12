@@ -1,15 +1,23 @@
 from google.cloud import documentai_v1 as documentai
 from google.cloud import storage
 import numpy as np
+import argparse
 from config import *
 from utility import *
+
+
+ap = argparse.ArgumentParser()
+ap.add_argument('-f', '--file', required=True, 
+                help="file to be digitised,  valid formats: PDF, TIFF, GIF, JPEG, PNG, BMP, WEBP",
+                default='EUR-MED_C1300_Skywalker.pdf')
+args = vars(ap.parse_args())
 
 # TODO(developer): Uncomment these variables before running the sample.
 project_id= 'edd-gcp-01'
 location = 'eu' # Format is 'us' or 'eu'
 processor_id = '10c5d397b0870d86' # Create processor in Cloud Console
-#file_path = '\invent_lab_projects\offline-sandbox\EUR-MED_C1300_Skywalker.pdf'
-file_path = 'EUR-MED_C1300_Skywalker.pdf'
+# file_path = 'EUR-MED_C1300_Skywalker.pdf'
+# file_path = 'Scanned_form.pdf'
 
 def process_document_sample(
     project_id: str, location: str, processor_id: str, file_path: str
@@ -61,7 +69,7 @@ def process_document_sample(
         ground_field = ground_truth[field[0]]
         for paragraph_num in field.paragraph:
           field_text += get_text(page.paragraphs[paragraph_num].layout, document)
-        field_text = remove_from_text(field_text, GCP_PARAGRAPHS[idx].filter_keywords)
+        field_text = remove_from_text(field_text, OCR_LOCATIONS[idx].filter_keywords)
         print(f'Ground Truth: \n{ground_field}\n')
         text = field_text.split('\n')
         print(f'Field Text: \n{text}\n')
