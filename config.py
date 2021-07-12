@@ -4,29 +4,54 @@ from collections import namedtuple
 # input document which we wish to OCR
 OCRLocation = namedtuple("OCRLocation", ["id", "bbox",
     "filter_keywords"])
+GCPParagraphs = namedtuple("GCPParagraphs", ["id", "bbox",
+    "filter_keywords"])
 FieldNames = namedtuple("FieldNames", ['id','paragraph'])
 # define the locations of each area of the document we wish to OCR
 
 OCR_LOCATIONS = [
     OCRLocation("Exporter", (252, 147, 1368, 349),
-        ['Exporter', '(Name,', 'full', 'address', 'country)']),
+        ['1.',',','Exporter', '(Name', 'full', 'address', 'country)']),
     OCRLocation("preferential_trade_between", (1720, 416, 1435, 511),
         ['Certificate', 'used', 'in', 'preferential', 'trade', 'between', "and", "(Insert", 'appropriate', 'countries', 'or', 'groups', 'of', 'territories)']),
     OCRLocation("Consignee", (252, 546, 1368, 615),
-        ["Consignee", "(Name", "full address", "country)", ",", "(Optional)", "3"]),
+        ['.',"Consignee", "(Name", "full address", "country)", ",", "(Optional)", "3"]),
     OCRLocation("transport_details", (252, 1211, 1368, 463),
-        ["Transport", "details", "(Optional)", "6"]),
+        ['.',"Transport", "details", "(Optional)", "6"]),
     OCRLocation("item_number", (252, 1724, 772, 1799),
         ["8.", "Item", "number:", "marks", "and", "numbers", '(1)', 'If goods', 'are not', 'packed', 'indicate', 'number', 'of articles', 'or state', '\"in bulk\"', 'as appro-', 'priate']),
     OCRLocation("description_of_goods", (1024, 1724, 1422, 1799),
         ["Number", "and", "kind", "of", "packages", "(1):", "description", "goods", '(Insert x in the appropriate box)']),
     OCRLocation("gross_weight", (2466, 1724, 349, 1799), 
-        ['9. Gross', "Gross", "weight", "(kg)", "or", "other", "measure", "(litres,", "cu.", "m.,", "etc)", '10. Invoices', '(Optional)']),
+        ['9.', "Gross", "weight", "(kg)", "or", "other", "measure", "(litres,", "cu.", "m.,", "etc)", '10. Invoices', '(Optional)']),
     OCRLocation("customs_office", (252, 3743, 1797, 792),
-        ["Customs", "11.", "office", 'Declaration', 'certified', 'Export', 'document', '(2):', 'From', 'No.', 'Endorsement', 'stamp', 'Issuing', 'country', 'or', 'territory', 'UNITED', 'KINGDOM', "date", "(Signature)",
-         '(2)', 'Complete', 'only', 'where', 'the', 'reg-', 'ulations', 'of the', 'exporting', 'country', 'or', 'territory', 'require.']),
+        ["Customs", "11.", "office", 'Declaration', 'certified', 'Export', 'document', '(2):', 'From', 'po', 'No.', 'Endorsement', 'stamp', 'Issuing', 'country', 'or', 'territory', 'UNITED', 'KINGDOM', "date", "(Signature)",
+         '(2)', 'Complete', 'only', 'where', 'the', 'reg-', 'ulations', 'of the', 'exporting', 'country', 'or \n', 'territory', 'require.']),
     OCRLocation("exporter_date_signature", (2049, 3743, 1106, 792),
-        ['12.', 'Declaration', 'by', 'Exporter', 'I,', 'the', 'undersigned,', 'declare', 'that', 'the', 'goods', 'described', 'above', 'meet', 'conditions', 'required', 'for', 'issue', 'of', 'this', 'certificate.',"(Place", "and", "date)", "(Signature)", "."]),
+        ['12.', 'Declaration', 'by', 'Exporter', 'I,', 'the', 'undersigned,', 'declare', 'that', 'the', 'goods', 'described', 'above', 'meet', 'conditions', 'required', 'for', 'issue', 'of', 'this', 'certificate.', "(Place", "and", "date)", "(Signature)", "."]),
+    
+]
+
+GCP_PARAGRAPHS = [
+    GCPParagraphs("Exporter", (252, 147, 1368, 349),
+        ['1. Exporter (Name, full address, country)']),
+    GCPParagraphs("preferential_trade_between", (1720, 416, 1435, 511),
+        ['Certificate used in preferential trade between', "and", '(Insert appropriate countries or groups of territories)']),
+    GCPParagraphs("Consignee", (252, 546, 1368, 615),
+        ['3. Consignee (Name, full address, country) (Optional)']),
+    GCPParagraphs("transport_details", (252, 1211, 1368, 463),
+        ['6. Transport details (Optional)']),
+    GCPParagraphs("item_number", (252, 1724, 772, 1799),
+        ["8. Item number: marks and numbers", '(1)', 'If goods', 'are not', 'packed', 'indicate', 'number', 'of articles', 'or state', '\"in bulk\"', 'as appro-', 'priate']),
+    GCPParagraphs("description_of_goods", (1024, 1724, 1422, 1799),
+        ["Number and kind of packages (1): description of goods", '(Insert x in the appropriate box)']),
+    GCPParagraphs("gross_weight", (2466, 1724, 349, 1799), 
+        ['9. Gross weight', "(kg) or other", "measure", "(litres,", "cu. m., etc)", '10. Invoices', '(Optional)']),
+    GCPParagraphs("customs_office", (252, 3743, 1797, 792),
+        ["11. Customs Endorsement", 'Declaration certified', 'Export document (2):', 'Form', 'No.', 'Customs office', 'Issuing country or territory:', 'UNITED KINGDOM', 'Date', '(Signature)', 'Stamp',
+         '(2)', '.', 'Complete', 'only', 'where', 'the', 'reg-', 'ulations', 'of the', 'exporting', 'country', 'or \n', 'territory', 'require.']),
+    GCPParagraphs("exporter_date_signature", (2049, 3743, 1106, 792),
+        ['12. Declaration by Exporter', 'I, the undersigned, declare that the goods', 'described above meet the conditions required', 'for the issue of this certificate.', "(Place and date)", "(Signature)", "."]),
     
 ]
 
@@ -38,21 +63,19 @@ FIELD_NAMES = [
                FieldNames("item_number",[16]),
                FieldNames("description_of_goods",[15]),
                FieldNames("gross_weight",[17]),
-               FieldNames("customs_office",[21,22,26]),
-               FieldNames("customs_date_signature",[30,32]),
+               FieldNames("customs_office",[21,22,26,30,32]),
                FieldNames("exporter_date_signature",[28,31])
               ]
 
 
-ground_truth = {"Exporter":["Luke Skywalker", "Remote Island", "Ahch-To", "Outer Reaches"],
+ground_truth = {"Exporter":["Luke Skywalker,", "Remote Island,", "Ahch-To,", "Outer Reaches"],
                 "preferential_trade_between":["Ahch-To", "Jakko"],
-                "Consignee":["Rey Palpatine", "Niima Outpost", "Jakko", "Western Reaches"],
+                "Consignee":["Rey Palpatine,", "Niima Outpost,", "Jakko", "Western Reaches"],
                 "transport_details":["Millennium Falcon"],
                 "item_number":["#03418GH 093"],
                 "description_of_goods":["Ancient Jedi texts"],
                 "gross_weight":["15 kg"],
-                "customs_office":["Ahch-To", "30327", "Niima Outpost Militia"],
-                "customs_date_signature":["20/01/21", "Constable Zuvio"],
+                "customs_office":["Ahch-To", "30327", "Niima Outpost Militia","20/01/21", "Constable Zuvio"],
                 "exporter_date_signature":["Jedi Temple, 01/12/20", "Luck Skywalker"]}
 
 headings = ['1. Exporter \n (Name, full address, country)',

@@ -20,9 +20,8 @@ def ocr_acc(field_truth, field_ocr, all_acc):
         line_acc = np.zeros( (len(field_ocr[k:]),) )
         
         for j, oline in enumerate(field_ocr[k:]):
-            line_acc[j] = acc(fline.lower(), oline.lower())
+            line_acc[j] = acc(fline.strip(' ').lower(), oline.lower())
             
-        print(k)
         if len(line_acc) == 0:
             max_line_acc[i:len(field_truth)] = 0
             all_acc.append(len(field_truth)*[0])

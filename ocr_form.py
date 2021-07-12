@@ -1,5 +1,5 @@
 # USAGE
-# python3 ocr_form.py --image scans/File_000.jpeg --template EUR-MED_C1300-1.png --threshold 75
+# python3 ocr_form.py --image test_images/File_000.jpeg --template EUR-MED_C1300-1.png --threshold 75
 
 # import the necessary packages
 from pyimagesearch.alignment import align_images
@@ -45,7 +45,7 @@ if args['threshold'] == None:
 	aligned = cv2.resize(image, (scale*2*x, scale*2*y))
 else:
 	threshold = float(args['threshold'])
-	aligned = align_images(cv2.threshold(image, 130, 255, cv2.THRESH_BINARY)[1], template, 		debug=False)
+	aligned = align_images(cv2.threshold(image, 130, 255, cv2.THRESH_BINARY)[1], template, debug=False)
 #	aligned = align_images(image, template, debug=False)
 	y, x, _ = aligned.shape
 	print(f"orignal.shape: {aligned.shape}")
