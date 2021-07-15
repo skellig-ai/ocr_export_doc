@@ -1,0 +1,10 @@
+Form Field,Input,Confidence
+"1. Exporter,  (Name, full address, country)","Luke Skywalker, Remote Island, Ahch-To, Outer Reaches",0.9788628220558167
+"2. Certificate used in,  preferential trade between","Ahch-To, Jakko",0.9823691248893738
+"3. Consignee,  (Name, full address, country)(Optional)","Rey Palpatine, Niima Outpost, Jakko, Western Reaches",0.9743096232414246
+6. Transport details (Optional),Millennium Falcon,0.9901449680328369
+"8.1. Item number:,  marks and numbers",#03418GH 093,0.9853624701499939
+"8.2. Number and kind of packages (1):,  description of goods",Ancient Jedi texts,0.9897195100784302
+"9. Gross,  weight (kg),  of other,  measure,  (liters, cu. m., etc)",15 kg,0.9695926308631897
+11. Customs Endorsement,"Ahch-To, Fm., 30327,   Niima Outst Militia, 20/01/21, Constable Zuvio",0.9817280888557434
+12. Declaration by the Exporter,"Jedi Temple, 01/12/20, , Luck Skywalker",0.9786995351314545

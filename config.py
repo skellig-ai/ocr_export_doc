@@ -88,3 +88,13 @@ headings = ['1. Exporter \n (Name, full address, country)',
             '11.1. Customs Endorsement',
             '11.2. Customs Signature',
             '12. Declaration by the Exporter']
+
+sections = ['1. Exporter \n (Name, full address, country)',
+            '2. Certificate used in \n preferential trade between',
+            '3. Consignee \n (Name, full address, country)(Optional)',
+            '6. Transport details (Optional)',
+            '8.1. Item number: \n marks and numbers',
+            '8.2. Number and kind of packages (1): \n description of goods',
+            '9. Gross \n weight (kg) \n of other \n measure \n (liters, cu. m., etc)',
+            '11. Customs Endorsement',
+            '12. Declaration by the Exporter']
