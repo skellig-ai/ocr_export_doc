@@ -93,10 +93,11 @@ def process_document_sample(
          
          doc_text.append(field_text.replace('\n', ', '))
          field_acc[idx], doc_acc, field_text = ocr_acc(ground_field, field_text.split('\n'), doc_acc)
-         # print(f'Paragraph {idx}: (Field Accuracy = {field_acc[idx]}) \nParagraph Confidence: {sum(paragraph_confidence)/len(paragraph_confidence)} \n{field_text}\n\n')
+         print(f'Paragraph {idx}: (Field Accuracy = {field_acc[idx]}) \nParagraph Confidence: {sum(paragraph_confidence)/len(paragraph_confidence)} \n{field_text}\n\n')
          confidence.append(sum(paragraph_confidence)/len(paragraph_confidence))
          
     doc2csv(doc_text,confidence)
+    put_OCR(field_text, layout, image)
     print( f'Document Accuracy = {doc_acc[idx]} \n Confidence: {confidence}')
     return document_pages, document, template
 
@@ -126,7 +127,7 @@ def remove_from_text(field_text, removal_list):
 
 def put_OCR(field_text, layout, image):
   box_shape = get_bbox(layout, image.shape)
-  #cv2.rectangle(image, box_shape[0], box_shape[1], (0, 255, 0), 2)
+  cv2.rectangle(image, box_shape[0], box_shape[1], (255, 255, 255), -1)
   put_text(image, field_text, box_shape)
   
 def get_bbox(layout,img_shape):

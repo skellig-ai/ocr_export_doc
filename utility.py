@@ -36,7 +36,6 @@ def ocr_acc(field_truth, field_ocr, all_acc):
             ocr_text.append(field_ocr[k+max_idx])
             k += max_idx + 1
     
-    print(np.asarray(all_acc).mean())
     return max_line_acc.mean(), all_acc, ocr_text
 
 def damerau_levenshtein_distance(s1, s2):
